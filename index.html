@@ -369,14 +369,15 @@ var MUFREDAT = {
 };
 
 // ===================== STATE =====================
-// Sadece URL cihaza özgü — geri her şey merkezi (Apps Script)
+var SABIT_URL = 'https://script.google.com/macros/s/AKfycbyXdCnFVdZTiGTXc67-ApalVDlis9pQNjvyjY-MZDZ2zG3HJIGfLbPrVN6Z3y1zgXzihw/exec';
+
 var S = {
   questions: [], donem: 'ikisi', secmeli: {},
   curClass: '', curCourse: '', curStudentNo: '', curQ: 0, answers: [],
-  sheetsUrl: ''
+  sheetsUrl: SABIT_URL
 };
 
-// URL'i localStorage'dan yükle
+// Admin farklı URL girdiyse onu kullan
 try { var _u = localStorage.getItem('anket_sheets_url'); if(_u) S.sheetsUrl = _u; } catch(e){}
 
 // ===================== ŞİFRE =====================
