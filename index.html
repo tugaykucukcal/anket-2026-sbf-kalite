@@ -5,26 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Ders Değerlendirme Sistemi</title>
 <meta name="robots" content="noindex, nofollow, noarchive">
-/* Cevaplar sekmesi */
-  .data-table-wrap { overflow-x: auto; border: 1px solid var(--border); border-radius: var(--radius-sm); margin-top: 10px; }
-  .data-table { width: 100%; border-collapse: collapse; font-size: 12px; }
-  .data-table th { background: var(--bg); padding: 8px 10px; text-align: left; font-weight: 600; color: var(--muted); border-bottom: 1px solid var(--border); white-space: nowrap; }
-  .data-table td { padding: 7px 10px; border-bottom: 1px solid var(--border); color: var(--text); }
-  .data-table tr:last-child td { border-bottom: none; }
-  .data-table tr:hover td { background: var(--bg); }
-  .stat-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px,1fr)); gap: 12px; margin-bottom: 1rem; }
-  .stat-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 14px; }
-  .stat-card .stat-label { font-size: 12px; color: var(--muted); margin-bottom: 4px; }
-  .stat-card .stat-val { font-size: 24px; font-weight: 700; color: var(--accent); }
-  .stat-card .stat-sub { font-size: 11px; color: var(--muted); margin-top: 2px; }
-  .bar-wrap { margin-bottom: 10px; }
-  .bar-label { display: flex; justify-content: space-between; font-size: 12px; color: var(--muted); margin-bottom: 3px; }
-  .bar-track { height: 8px; background: var(--border); border-radius: 4px; }
-  .bar-fill { height: 8px; background: var(--accent); border-radius: 4px; transition: width 0.4s; }
-  .filter-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 12px; align-items: flex-end; }
-  .filter-row select { width: auto; min-width: 160px; }
-  .loading-msg { text-align: center; padding: 2rem; color: var(--muted); font-size: 13px; }
-  <style>
+<style>
   :root {
     --bg: #F7F6F3;
     --surface: #FFFFFF;
@@ -69,8 +50,8 @@
   .btn-danger:hover { background: var(--danger-bg); }
   .btn-ghost { border-color: transparent; background: transparent; }
   .btn-ghost:hover { background: var(--bg); }
-  .tabs { display: flex; border-bottom: 1px solid var(--border); margin-bottom: 1.5rem; gap: 2px; }
-  .tab-btn { padding: 9px 16px; font-size: 13px; font-weight: 500; background: none; border: none; border-bottom: 2px solid transparent; color: var(--muted); margin-bottom: -1px; transition: all 0.15s; }
+  .tabs { display: flex; border-bottom: 1px solid var(--border); margin-bottom: 1.5rem; gap: 2px; flex-wrap: wrap; }
+  .tab-btn { padding: 9px 14px; font-size: 13px; font-weight: 500; background: none; border: none; border-bottom: 2px solid transparent; color: var(--muted); margin-bottom: -1px; transition: all 0.15s; }
   .tab-btn:hover { color: var(--text); }
   .tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); }
   .tab-panel { display: none; }
@@ -137,6 +118,25 @@
   .semester-tag { display: inline-block; font-size: 10px; font-weight: 600; padding: 1px 7px; border-radius: 20px; margin-left: 6px; }
   .semester-guz { background: #FFF3E0; color: #8D4E00; }
   .semester-bahar { background: #E8F5E9; color: #1B5E20; }
+  /* Cevaplar sekmesi */
+  .data-table-wrap { overflow-x: auto; border: 1px solid var(--border); border-radius: var(--radius-sm); margin-top: 10px; }
+  .data-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+  .data-table th { background: var(--bg); padding: 8px 10px; text-align: left; font-weight: 600; color: var(--muted); border-bottom: 1px solid var(--border); white-space: nowrap; }
+  .data-table td { padding: 7px 10px; border-bottom: 1px solid var(--border); color: var(--text); }
+  .data-table tr:last-child td { border-bottom: none; }
+  .data-table tr:hover td { background: var(--bg); }
+  .stat-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px,1fr)); gap: 12px; margin-bottom: 1rem; }
+  .stat-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 14px; }
+  .stat-card .stat-label { font-size: 12px; color: var(--muted); margin-bottom: 4px; }
+  .stat-card .stat-val { font-size: 24px; font-weight: 700; color: var(--accent); }
+  .stat-card .stat-sub { font-size: 11px; color: var(--muted); margin-top: 2px; }
+  .bar-wrap { margin-bottom: 10px; }
+  .bar-label { display: flex; justify-content: space-between; font-size: 12px; color: var(--muted); margin-bottom: 3px; }
+  .bar-track { height: 8px; background: var(--border); border-radius: 4px; }
+  .bar-fill { height: 8px; background: var(--accent); border-radius: 4px; transition: width 0.4s; }
+  .filter-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 12px; align-items: flex-end; }
+  .filter-row select { width: auto; min-width: 160px; }
+  .loading-msg { text-align: center; padding: 2rem; color: var(--muted); font-size: 13px; }
 </style>
 </head>
 <body>
@@ -272,6 +272,32 @@
       JSON.stringify({status:"ok"}))
     .setMimeType(
       ContentService.MimeType.JSON);
+}
+
+function doGet(e) {
+  var sheet = SpreadsheetApp
+    .getActiveSpreadsheet()
+    .getActiveSheet();
+  var data = sheet.getDataRange().getValues();
+  var rows = [];
+  for (var i = 1; i < data.length; i++) {
+    var r = data[i];
+    rows.push({
+      tarih: Utilities.formatDate(
+        new Date(r[0]),
+        Session.getScriptTimeZone(),
+        "dd.MM.yyyy HH:mm"),
+      ogrenci_no: r[1]||'',
+      sinif: r[2]||'',
+      ders: r[3]||'',
+      cevaplar: r.slice(4)
+    });
+  }
+  return ContentService
+    .createTextOutput(
+      JSON.stringify({rows:rows}))
+    .setMimeType(
+      ContentService.MimeType.JSON);
 }</div>
     </div>
     <div class="card">
@@ -394,106 +420,43 @@
 </div><!-- /app -->
 
 <script>
-// ===================== MÜFREDAT =====================
-// Seçmeli grup placeholder'ları: admin panelinden doldurulur
 var MUFREDAT = {
   'Beden Eğitimi ve Spor Öğretmenliği': {
     'guz': {
-      '1. Sınıf': [
-        'Beden Eğitimi ve Sporun Temelleri','İnsan Anatomisi ve Kinesiyoloji',
-        'Hareket Eğitimi','Atatürk İlkeleri ve İnkılap Tarihi-I',
-        'Bilişim Teknolojileri','Türk Dili-I','Yabancı Dil-I',
-        'Eğitime Giriş','Eğitim Sosyolojisi'
-      ],
-      '2. Sınıf': [
-        'BE-Spor Öğrenme ve Öğretim Yaklaşımları','Motor Gelişim',
-        'Topluma Hizmet Uygulamaları','Öğretim Teknolojileri','Öğretim İlke ve Yöntemleri'
-      ],
-      '3. Sınıf': [
-        'Antrenman Bilgisi','Beden Eğitimi ve Spor Öğretimi','Yüzme',
-        'Eğitimde Ahlak ve Etik','Sınıf Yönetimi'
-      ],
-      '4. Sınıf': [
-        'Halk Oyunları','Egzersiz ve Beslenme','Eğitsel Oyunlar',
-        'Öğretmenlik Uygulaması-I','Özel Eğitim ve Kaynaştırma'
-      ]
+      '1. Sınıf': ['Beden Eğitimi ve Sporun Temelleri','İnsan Anatomisi ve Kinesiyoloji','Hareket Eğitimi','Atatürk İlkeleri ve İnkılap Tarihi-I','Bilişim Teknolojileri','Türk Dili-I','Yabancı Dil-I','Eğitime Giriş','Eğitim Sosyolojisi'],
+      '2. Sınıf': ['BE-Spor Öğrenme ve Öğretim Yaklaşımları','Motor Gelişim','Topluma Hizmet Uygulamaları','Öğretim Teknolojileri','Öğretim İlke ve Yöntemleri'],
+      '3. Sınıf': ['Antrenman Bilgisi','Beden Eğitimi ve Spor Öğretimi','Yüzme','Eğitimde Ahlak ve Etik','Sınıf Yönetimi'],
+      '4. Sınıf': ['Halk Oyunları','Egzersiz ve Beslenme','Eğitsel Oyunlar','Öğretmenlik Uygulaması-I','Özel Eğitim ve Kaynaştırma']
     },
     'bahar': {
-      '1. Sınıf': [
-        'Sağlık Bilgisi ve İlk Yardım','Cimnastik','Atletizm',
-        'Atatürk İlkeleri ve İnkılap Tarihi-II','Türk Dili-II','Yabancı Dil-II',
-        'Eğitim Psikolojisi','Eğitim Felsefesi'
-      ],
-      '2. Sınıf': [
-        'BE ve Spor Öğrenme Öğretim Programları','Egzersiz Fizyolojisi',
-        'Ritim Eğitimi ve Dans','Türk Eğitim Tarihi','Eğitimde Araştırma Yöntemleri'
-      ],
-      '3. Sınıf': [
-        'Beceri Öğrenimi','Fiziksel Uygunluk','Doğa Sporları',
-        'Eğitimde Ölçme ve Değerlendirme','Türk Eğitim Sistemi ve Okul Yönetimi'
-      ],
-      '4. Sınıf': [
-        'BE ve Sporda Organizasyon ve Yönetim','Sağlıklı Yaşam İçin Egzersiz Programlama',
-        'Uyarlanmış Beden Eğitimi ve Spor','Öğretmenlik Uygulaması-II','Okullarda Rehberlik'
-      ]
+      '1. Sınıf': ['Sağlık Bilgisi ve İlk Yardım','Cimnastik','Atletizm','Atatürk İlkeleri ve İnkılap Tarihi-II','Türk Dili-II','Yabancı Dil-II','Eğitim Psikolojisi','Eğitim Felsefesi'],
+      '2. Sınıf': ['BE ve Spor Öğrenme Öğretim Programları','Egzersiz Fizyolojisi','Ritim Eğitimi ve Dans','Türk Eğitim Tarihi','Eğitimde Araştırma Yöntemleri'],
+      '3. Sınıf': ['Beceri Öğrenimi','Fiziksel Uygunluk','Doğa Sporları','Eğitimde Ölçme ve Değerlendirme','Türk Eğitim Sistemi ve Okul Yönetimi'],
+      '4. Sınıf': ['BE ve Sporda Organizasyon ve Yönetim','Sağlıklı Yaşam İçin Egzersiz Programlama','Uyarlanmış Beden Eğitimi ve Spor','Öğretmenlik Uygulaması-II','Okullarda Rehberlik']
     }
   },
   'Antrenörlük Eğitimi': {
     'guz': {
-      '1. Sınıf': [
-        'Hareket Eğitimi','Spor Bilimlerine Giriş','Eğitsel Oyunlar',
-        'İnsan Anatomisi','Atatürk İlkeleri ve İnkılap Tarihi I',
-        'Türk Dili-I','Yabancı Dil-I'
-      ],
-      '2. Sınıf': [
-        'Temel Bilgi Teknolojisi Kullanımı','Antrenman Bilimi-I',
-        'Egzersiz Fizyolojisi II','Kayak','Motor Gelişim','Sporcu Beslenmesi'
-      ],
-      '3. Sınıf': [
-        'Yarışma/Müsabaka Analizi','Spor Sosyolojisi','Fiziksel Uygunluk',
-        'Akademik Yazma Becerileri Geliştirme','Ergojeník Yardım ve Dopingle Mücadele',
-        'Spor Yaralanmaları ve Spora Dönüş Egzersizleri',
-        'Atletik Performans Geliştirme Yöntemleri-II'
-      ],
-      '4. Sınıf': [
-        'Spor Bilimlerinde Araştırma Projesi I','İşme Değerlendirmesi I','İşme Uygulaması-I'
-      ]
+      '1. Sınıf': ['Hareket Eğitimi','Spor Bilimlerine Giriş','Eğitsel Oyunlar','İnsan Anatomisi','Atatürk İlkeleri ve İnkılap Tarihi I','Türk Dili-I','Yabancı Dil-I'],
+      '2. Sınıf': ['Temel Bilgi Teknolojisi Kullanımı','Antrenman Bilimi-I','Egzersiz Fizyolojisi II','Kayak','Motor Gelişim','Sporcu Beslenmesi'],
+      '3. Sınıf': ['Yarışma/Müsabaka Analizi','Spor Sosyolojisi','Fiziksel Uygunluk','Akademik Yazma Becerileri Geliştirme','Ergojeník Yardım ve Dopingle Mücadele','Spor Yaralanmaları ve Spora Dönüş Egzersizleri','Atletik Performans Geliştirme Yöntemleri-II'],
+      '4. Sınıf': ['Spor Bilimlerinde Araştırma Projesi I','İşme Değerlendirmesi I','İşme Uygulaması-I']
     },
     'bahar': {
-      '1. Sınıf': [
-        'Spor Anatomisi ve Kinesiyoloji','Yüzme','Egzersiz Fizyolojisi I',
-        'Sporcu Sağlığı ve İlk Yardım','Atletizm',
-        'Atatürk İlkeleri ve İnkılap Tarihi II','Türk Dili-II','Yabancı Dil-II'
-      ],
-      '2. Sınıf': [
-        'Sporda Beceri Öğrenimi','Cimnastik','Antrenman Bilimi-II',
-        'Sporda Yetenek Seçimi','Spor Psikolojisi',
-        'Atletik Performans Geliştirme Yöntemleri-I'
-      ],
-      '3. Sınıf': [
-        'Su Sporları','Türk Spor Kültürü','Bilimsel Araştırma Yöntemleri',
-        'Spor Biyomekaniği','Performans Ölçümleri, Testleri ve Değerlendirme',
-        'Sporda Yönetim ve Organizasyon','Sporda Etik Değerler ve Fair-Play Eğitimi'
-      ],
-      '4. Sınıf': [
-        'Spor Bilimlerinde Araştırma Projesi II','İşme Değerlendirmesi II','İşme Uygulaması-II'
-      ]
+      '1. Sınıf': ['Spor Anatomisi ve Kinesiyoloji','Yüzme','Egzersiz Fizyolojisi I','Sporcu Sağlığı ve İlk Yardım','Atletizm','Atatürk İlkeleri ve İnkılap Tarihi II','Türk Dili-II','Yabancı Dil-II'],
+      '2. Sınıf': ['Sporda Beceri Öğrenimi','Cimnastik','Antrenman Bilimi-II','Sporda Yetenek Seçimi','Spor Psikolojisi','Atletik Performans Geliştirme Yöntemleri-I'],
+      '3. Sınıf': ['Su Sporları','Türk Spor Kültürü','Bilimsel Araştırma Yöntemleri','Spor Biyomekaniği','Performans Ölçümleri, Testleri ve Değerlendirme','Sporda Yönetim ve Organizasyon','Sporda Etik Değerler ve Fair-Play Eğitimi'],
+      '4. Sınıf': ['Spor Bilimlerinde Araştırma Projesi II','İşme Değerlendirmesi II','İşme Uygulaması-II']
     }
   }
 };
 
-// ===================== STATE =====================
 var S = {
-  questions: [],
-  sheetsUrl: '',
-  donem: 'ikisi', // 'guz' | 'bahar' | 'ikisi'
-  secmeli: {}, // { 'Bolum|Sinif|Donem': ['ders1', 'ders2'] }
-  curClass: '', curCourse: '', curStudentNo: '',
-  curQ: 0, answers: []
+  questions: [], sheetsUrl: '', donem: 'ikisi',
+  secmeli: {}, curClass: '', curCourse: '', curStudentNo: '', curQ: 0, answers: []
 };
 
-// ===================== ŞİFRE =====================
-var ADMIN_PWD = 'sbf2024'; // <-- Buradan şifreyi değiştirebilirsiniz
+var ADMIN_PWD = 'sbf2024';
 
 function openPwdModal() {
   document.getElementById('pwd-input').value = '';
@@ -527,7 +490,6 @@ document.addEventListener('DOMContentLoaded', function(){
   _goTo('screen-student');
 });
 
-// ===================== NAVİGASYON =====================
 function _goTo(id) {
   document.querySelectorAll('.screen').forEach(function(s){ s.classList.remove('active'); });
   document.getElementById(id).classList.add('active');
@@ -540,10 +502,7 @@ function _goTo(id) {
     if (id === 'screen-student') refreshStudentBadge();
   }
 }
-function goTo(id) {
-  if (id === 'screen-admin') { openPwdModal(); return; }
-  _goTo(id);
-}
+function goTo(id) { if (id === 'screen-admin') { openPwdModal(); return; } _goTo(id); }
 function switchTab(btn, panelId) {
   document.querySelectorAll('.tab-btn').forEach(function(b){ b.classList.remove('active'); });
   document.querySelectorAll('.tab-panel').forEach(function(p){ p.classList.remove('active'); });
@@ -551,237 +510,129 @@ function switchTab(btn, panelId) {
   document.getElementById(panelId).classList.add('active');
 }
 
-// ===================== DÖNEM =====================
-function setDonem(d) {
-  S.donem = d;
-  renderDonemUI();
-}
+function setDonem(d) { S.donem = d; renderDonemUI(); }
 function renderDonemUI() {
   var labels = { guz: '🍂 Güz Dönemi', bahar: '🌸 Bahar Dönemi', ikisi: '📅 İkisi de Açık' };
   document.getElementById('donem-label').textContent = labels[S.donem];
   ['guz','bahar','ikisi'].forEach(function(d){
-    var btn = document.getElementById('btn-'+d);
-    btn.className = 'donem-btn' + (S.donem===d ? ' active-'+d : '');
+    document.getElementById('btn-'+d).className = 'donem-btn' + (S.donem===d?' active-'+d:'');
   });
   refreshStudentBadge();
 }
 function refreshStudentBadge() {
   var el = document.getElementById('donem-student-badge');
-  var map = {
-    guz: '<span class="badge badge-guz">🍂 Güz Dönemi</span>',
-    bahar: '<span class="badge badge-bahar">🌸 Bahar Dönemi</span>',
-    ikisi: '<span class="badge badge-ikisi">📅 Güz & Bahar</span>'
-  };
+  var map = { guz:'<span class="badge badge-guz">🍂 Güz Dönemi</span>', bahar:'<span class="badge badge-bahar">🌸 Bahar Dönemi</span>', ikisi:'<span class="badge badge-ikisi">📅 Güz & Bahar</span>' };
   el.innerHTML = map[S.donem] || '';
 }
 
-// ===================== SEÇMELİ DERSLER =====================
 var SEC_SINIFLAR = {
-  'Beden Eğitimi ve Spor Öğretmenliği': {
-    guz:   ['1. Sınıf (Güz)','2. Sınıf (Güz)','3. Sınıf (Güz)','4. Sınıf (Güz)'],
-    bahar: ['1. Sınıf (Bahar)','2. Sınıf (Bahar)','3. Sınıf (Bahar)','4. Sınıf (Bahar)']
-  },
-  'Antrenörlük Eğitimi': {
-    guz:   ['1. Sınıf (Güz)','2. Sınıf (Güz)','3. Sınıf (Güz)','4. Sınıf (Güz)'],
-    bahar: ['1. Sınıf (Bahar)','2. Sınıf (Bahar)','3. Sınıf (Bahar)','4. Sınıf (Bahar)']
-  }
+  'Beden Eğitimi ve Spor Öğretmenliği': { guz:['1. Sınıf (Güz)','2. Sınıf (Güz)','3. Sınıf (Güz)','4. Sınıf (Güz)'], bahar:['1. Sınıf (Bahar)','2. Sınıf (Bahar)','3. Sınıf (Bahar)','4. Sınıf (Bahar)'] },
+  'Antrenörlük Eğitimi': { guz:['1. Sınıf (Güz)','2. Sınıf (Güz)','3. Sınıf (Güz)','4. Sınıf (Güz)'], bahar:['1. Sınıf (Bahar)','2. Sınıf (Bahar)','3. Sınıf (Bahar)','4. Sınıf (Bahar)'] }
 };
-
 function updateSecSinif() {
   var bolum = document.getElementById('sec-bolum').value;
   var sel = document.getElementById('sec-sinif');
   if (!bolum) { sel.innerHTML = '<option value="">-- Önce bölüm seçin --</option>'; return; }
   var opts = SEC_SINIFLAR[bolum].guz.concat(SEC_SINIFLAR[bolum].bahar);
-  sel.innerHTML = '<option value="">-- Sınıf/Dönem seçin --</option>' +
-    opts.map(function(s){ return '<option value="'+s+'">'+s+'</option>'; }).join('');
+  sel.innerHTML = '<option value="">-- Sınıf/Dönem seçin --</option>' + opts.map(function(s){ return '<option value="'+s+'">'+s+'</option>'; }).join('');
 }
-
 function secKey(bolum, sinif) { return bolum + '||' + sinif; }
-
 function addSecmeli() {
-  var bolum = document.getElementById('sec-bolum').value;
-  var sinif = document.getElementById('sec-sinif').value;
-  var ders  = document.getElementById('sec-ders').value.trim();
-  if (!bolum || !sinif || !ders) { alert('Lütfen bölüm, sınıf ve ders adını girin.'); return; }
-  var key = secKey(bolum, sinif);
-  if (!S.secmeli[key]) S.secmeli[key] = [];
-  if (S.secmeli[key].indexOf(ders) === -1) S.secmeli[key].push(ders);
-  document.getElementById('sec-ders').value = '';
+  var bolum=document.getElementById('sec-bolum').value, sinif=document.getElementById('sec-sinif').value, ders=document.getElementById('sec-ders').value.trim();
+  if (!bolum||!sinif||!ders) { alert('Lütfen bölüm, sınıf ve ders adını girin.'); return; }
+  var key=secKey(bolum,sinif);
+  if (!S.secmeli[key]) S.secmeli[key]=[];
+  if (S.secmeli[key].indexOf(ders)===-1) S.secmeli[key].push(ders);
+  document.getElementById('sec-ders').value='';
   renderSecmeliList();
 }
-
-function removeSecmeli(key, i) {
-  S.secmeli[key].splice(i, 1);
-  if (!S.secmeli[key].length) delete S.secmeli[key];
-  renderSecmeliList();
-}
-
+function removeSecmeli(key,i) { S.secmeli[key].splice(i,1); if(!S.secmeli[key].length) delete S.secmeli[key]; renderSecmeliList(); }
 function renderSecmeliList() {
-  var el = document.getElementById('secmeli-list');
-  var keys = Object.keys(S.secmeli);
-  if (!keys.length) { el.innerHTML = '<p style="font-size:13px;color:var(--muted)">Henüz seçmeli ders eklenmedi.</p>'; return; }
-  el.innerHTML = keys.map(function(key){
-    var parts = key.split('||');
-    var bolum = parts[0], sinif = parts[1];
-    var donemTag = sinif.indexOf('Güz') !== -1
-      ? '<span class="semester-tag semester-guz">Güz</span>'
-      : '<span class="semester-tag semester-bahar">Bahar</span>';
-    var items = S.secmeli[key].map(function(d, i){
-      return '<div class="sec-item"><span>'+d+'</span><button class="btn btn-sm btn-danger" onclick="removeSecmeli(\''+key.replace(/'/g,"\\'")+'\',' + i + ')">Sil</button></div>';
-    }).join('');
-    return '<div class="sec-group">' +
-      '<div class="sec-group-header" onclick="toggleSecGroup(this)">' +
-        '<span>' + sinif + donemTag + ' <span style="color:var(--muted);font-weight:400;font-size:12px">— ' + bolum.split(' ')[0] + '</span></span>' +
-        '<span style="font-size:12px;color:var(--muted)">' + S.secmeli[key].length + ' ders ▾</span>' +
-      '</div>' +
-      '<div class="sec-group-body open">' + items + '</div>' +
-    '</div>';
+  var el=document.getElementById('secmeli-list'), keys=Object.keys(S.secmeli);
+  if (!keys.length) { el.innerHTML='<p style="font-size:13px;color:var(--muted)">Henüz seçmeli ders eklenmedi.</p>'; return; }
+  el.innerHTML=keys.map(function(key){ var parts=key.split('||'),bolum=parts[0],sinif=parts[1];
+    var donemTag=sinif.indexOf('Güz')!==-1?'<span class="semester-tag semester-guz">Güz</span>':'<span class="semester-tag semester-bahar">Bahar</span>';
+    var items=S.secmeli[key].map(function(d,i){ return '<div class="sec-item"><span>'+d+'</span><button class="btn btn-sm btn-danger" onclick="removeSecmeli(\''+key.replace(/'/g,"\\'")+'\',' +i+')">Sil</button></div>'; }).join('');
+    return '<div class="sec-group"><div class="sec-group-header" onclick="toggleSecGroup(this)"><span>'+sinif+donemTag+' <span style="color:var(--muted);font-weight:400;font-size:12px">— '+bolum.split(' ')[0]+'</span></span><span style="font-size:12px;color:var(--muted)">'+S.secmeli[key].length+' ders ▾</span></div><div class="sec-group-body open">'+items+'</div></div>';
   }).join('');
 }
+function toggleSecGroup(header) { header.nextElementSibling.classList.toggle('open'); }
 
-function toggleSecGroup(header) {
-  var body = header.nextElementSibling;
-  body.classList.toggle('open');
-}
-
-// ===================== SORULAR =====================
 function addQuestion() {
-  var text = document.getElementById('new-q-text').value.trim();
-  var type = document.getElementById('new-q-type').value;
+  var text=document.getElementById('new-q-text').value.trim(), type=document.getElementById('new-q-type').value;
   if (!text) return;
-  S.questions.push({ text: text, type: type });
-  document.getElementById('new-q-text').value = '';
-  renderQuestions();
+  S.questions.push({text:text,type:type}); document.getElementById('new-q-text').value=''; renderQuestions();
 }
-function deleteQuestion(i) { S.questions.splice(i, 1); renderQuestions(); }
+function deleteQuestion(i) { S.questions.splice(i,1); renderQuestions(); }
 function renderQuestions() {
-  var el = document.getElementById('question-list');
-  if (!S.questions.length) { el.innerHTML = '<p style="font-size:13px;color:var(--muted)">Henüz soru eklenmedi.</p>'; return; }
-  var labels = { rating: '1–5 Puan', text: 'Açık uçlu', yesno: 'Evet/Hayır' };
-  el.innerHTML = S.questions.map(function(q, i){
-    return '<div class="q-item">' +
-      '<div class="q-num">'+(i+1)+'</div>' +
-      '<span class="q-text">'+q.text+'</span>' +
-      '<span class="q-type">'+labels[q.type]+'</span>' +
-      '<button class="btn btn-sm btn-danger" onclick="deleteQuestion('+i+')">Sil</button>' +
-    '</div>';
-  }).join('');
+  var el=document.getElementById('question-list');
+  if (!S.questions.length) { el.innerHTML='<p style="font-size:13px;color:var(--muted)">Henüz soru eklenmedi.</p>'; return; }
+  var labels={rating:'1–5 Puan',text:'Açık uçlu',yesno:'Evet/Hayır'};
+  el.innerHTML=S.questions.map(function(q,i){ return '<div class="q-item"><div class="q-num">'+(i+1)+'</div><span class="q-text">'+q.text+'</span><span class="q-type">'+labels[q.type]+'</span><button class="btn btn-sm btn-danger" onclick="deleteQuestion('+i+')">Sil</button></div>'; }).join('');
 }
 
-// ===================== GOOGLE SHEETS =====================
 function saveUrl() {
-  S.sheetsUrl = document.getElementById('sheets-url').value.trim();
-  document.getElementById('url-ok').style.display = S.sheetsUrl ? 'block' : 'none';
+  S.sheetsUrl=document.getElementById('sheets-url').value.trim();
+  document.getElementById('url-ok').style.display=S.sheetsUrl?'block':'none';
 }
 
-// ===================== ÖĞRENCİ EKRANI =====================
-function getActiveDonems() {
-  if (S.donem === 'guz')   return ['guz'];
-  if (S.donem === 'bahar') return ['bahar'];
-  return ['guz','bahar'];
-}
-
+function getActiveDonems() { if(S.donem==='guz') return ['guz']; if(S.donem==='bahar') return ['bahar']; return ['guz','bahar']; }
 function updateStClasses() {
-  var dept = document.getElementById('st-dept').value;
-  var sel  = document.getElementById('st-class');
-  if (!dept || !MUFREDAT[dept]) {
-    sel.innerHTML = '<option value="">-- Önce bölüm seçin --</option>';
-    document.getElementById('st-course').innerHTML = '<option value="">-- Önce sınıf seçin --</option>';
-    return;
-  }
-  var donems = getActiveDonems();
-  var siniflar = [];
-  var siraMap = { '1. Sınıf': 1, '2. Sınıf': 2, '3. Sınıf': 3, '4. Sınıf': 4 };
-  // güz önce, bahar sonra; sınıf sırasına göre
-  var donemOrder = ['guz','bahar'];
-  donemOrder.forEach(function(d){
-    if (donems.indexOf(d) === -1) return;
-    Object.keys(MUFREDAT[dept][d]).sort(function(a,b){ return siraMap[a]-siraMap[b]; }).forEach(function(sinif){
-      var label = sinif + ' (' + (d==='guz'?'Güz':'Bahar') + ')';
-      siniflar.push({ value: d+'|'+sinif, label: label });
-    });
-  });
-  sel.innerHTML = '<option value="">-- Sınıf seçin --</option>' +
-    siniflar.map(function(s){ return '<option value="'+s.value+'">'+s.label+'</option>'; }).join('');
-  document.getElementById('st-course').innerHTML = '<option value="">-- Önce sınıf seçin --</option>';
+  var dept=document.getElementById('st-dept').value, sel=document.getElementById('st-class');
+  if (!dept||!MUFREDAT[dept]) { sel.innerHTML='<option value="">-- Önce bölüm seçin --</option>'; document.getElementById('st-course').innerHTML='<option value="">-- Önce sınıf seçin --</option>'; return; }
+  var donems=getActiveDonems(), siniflar=[], siraMap={'1. Sınıf':1,'2. Sınıf':2,'3. Sınıf':3,'4. Sınıf':4};
+  ['guz','bahar'].forEach(function(d){ if(donems.indexOf(d)===-1) return; Object.keys(MUFREDAT[dept][d]).sort(function(a,b){return siraMap[a]-siraMap[b];}).forEach(function(sinif){ siniflar.push({value:d+'|'+sinif,label:sinif+' ('+(d==='guz'?'Güz':'Bahar')+')'});}); });
+  sel.innerHTML='<option value="">-- Sınıf seçin --</option>'+siniflar.map(function(s){return '<option value="'+s.value+'">'+s.label+'</option>';}).join('');
+  document.getElementById('st-course').innerHTML='<option value="">-- Önce sınıf seçin --</option>';
 }
-
 function updateStCourses() {
-  var dept  = document.getElementById('st-dept').value;
-  var val   = document.getElementById('st-class').value; // e.g. "guz|1. Sınıf"
-  var sel   = document.getElementById('st-course');
-  if (!dept || !val) { sel.innerHTML = '<option value="">-- Önce sınıf seçin --</option>'; return; }
-  var parts = val.split('|');
-  var donem = parts[0], sinif = parts[1];
-  var zorunlu = (MUFREDAT[dept][donem] && MUFREDAT[dept][donem][sinif]) || [];
-  // seçmeli ders ekle
-  var sinifLabel = sinif + ' (' + (donem==='guz'?'Güz':'Bahar') + ')';
-  var key = secKey(dept, sinifLabel);
-  var secmeli = S.secmeli[key] || [];
-  var tumDersler = zorunlu.concat(secmeli);
-  if (!tumDersler.length) { sel.innerHTML = '<option value="">Bu sınıf için ders tanımlanmamış</option>'; return; }
-  sel.innerHTML = '<option value="">-- Ders seçin --</option>' +
-    tumDersler.map(function(c){ return '<option value="'+c+'">'+c+'</option>'; }).join('');
+  var dept=document.getElementById('st-dept').value, val=document.getElementById('st-class').value, sel=document.getElementById('st-course');
+  if (!dept||!val) { sel.innerHTML='<option value="">-- Önce sınıf seçin --</option>'; return; }
+  var parts=val.split('|'), donem=parts[0], sinif=parts[1];
+  var zorunlu=(MUFREDAT[dept][donem]&&MUFREDAT[dept][donem][sinif])||[];
+  var sinifLabel=sinif+' ('+(donem==='guz'?'Güz':'Bahar')+')';
+  var secmeli=S.secmeli[secKey(dept,sinifLabel)]||[];
+  var tumDersler=zorunlu.concat(secmeli);
+  if (!tumDersler.length) { sel.innerHTML='<option value="">Bu sınıf için ders tanımlanmamış</option>'; return; }
+  sel.innerHTML='<option value="">-- Ders seçin --</option>'+tumDersler.map(function(c){return '<option value="'+c+'">'+c+'</option>';}).join('');
 }
-
 function startSurvey() {
-  var no   = document.getElementById('st-number').value.trim();
-  var dept = document.getElementById('st-dept').value;
-  var val  = document.getElementById('st-class').value;
-  var crs  = document.getElementById('st-course').value;
-  if (!no)           { alert('Lütfen öğrenci numaranızı girin.'); return; }
+  var no=document.getElementById('st-number').value.trim(), dept=document.getElementById('st-dept').value, val=document.getElementById('st-class').value, crs=document.getElementById('st-course').value;
+  if (!no) { alert('Lütfen öğrenci numaranızı girin.'); return; }
   if (!dept||!val||!crs) { alert('Lütfen bölüm, sınıf ve ders seçin.'); return; }
   if (!S.questions.length) { alert('Admin panelinden soru eklenmemiş.'); return; }
-  var parts = val.split('|');
-  var donemStr = parts[0]==='guz'?'Güz':'Bahar';
-  S.curStudentNo = no;
-  S.curClass = dept + ' / ' + parts[1] + ' (' + donemStr + ')';
-  S.curCourse = crs;
-  S.curQ = 0; S.answers = new Array(S.questions.length).fill(null);
-  document.getElementById('student-select').style.display = 'none';
-  document.getElementById('survey-body').style.display = 'block';
-  document.getElementById('st-course-label').textContent = crs;
+  var parts=val.split('|'), donemStr=parts[0]==='guz'?'Güz':'Bahar';
+  S.curStudentNo=no; S.curClass=dept+' / '+parts[1]+' ('+donemStr+')'; S.curCourse=crs;
+  S.curQ=0; S.answers=new Array(S.questions.length).fill(null);
+  document.getElementById('student-select').style.display='none';
+  document.getElementById('survey-body').style.display='block';
+  document.getElementById('st-course-label').textContent=crs;
   renderQuestion();
 }
-
 function renderQuestion() {
-  var q = S.questions[S.curQ];
-  var total = S.questions.length;
-  document.getElementById('progress-fill').style.width = Math.round((S.curQ/total)*100) + '%';
-  document.getElementById('q-label').textContent = 'Soru '+(S.curQ+1)+' / '+total;
-  var saved = S.answers[S.curQ];
-  var html = '<div class="card"><p style="font-size:15px;font-weight:500;margin-bottom:1rem">'+q.text+'</p>';
+  var q=S.questions[S.curQ], total=S.questions.length, saved=S.answers[S.curQ];
+  document.getElementById('progress-fill').style.width=Math.round((S.curQ/total)*100)+'%';
+  document.getElementById('q-label').textContent='Soru '+(S.curQ+1)+' / '+total;
+  var html='<div class="card"><p style="font-size:15px;font-weight:500;margin-bottom:1rem">'+q.text+'</p>';
   if (q.type==='rating') {
-    html += '<div class="rating-group">';
-    for (var i=1;i<=5;i++) html += '<button class="rating-btn'+(saved===i?' selected':'')+'" onclick="pickRating(this,'+i+')">'+i+'</button>';
-    html += '</div><p class="rating-hint">1 = Çok kötü &nbsp;·&nbsp; 5 = Çok iyi</p>';
+    html+='<div class="rating-group">';
+    for(var i=1;i<=5;i++) html+='<button class="rating-btn'+(saved===i?' selected':'')+'" onclick="pickRating(this,'+i+')">'+i+'</button>';
+    html+='</div><p class="rating-hint">1 = Çok kötü &nbsp;·&nbsp; 5 = Çok iyi</p>';
   } else if (q.type==='text') {
-    html += '<textarea id="ans-text" placeholder="Görüşünüzü yazın...">'+(saved||'')+'</textarea>';
+    html+='<textarea id="ans-text" placeholder="Görüşünüzü yazın...">'+(saved||'')+'</textarea>';
   } else {
-    html += '<div class="rating-group">';
-    ['Evet','Hayır'].forEach(function(opt){
-      html += '<button class="rating-btn'+(saved===opt?' selected':'')+'" onclick="pickYN(this,\''+opt+'\')">'+opt+'</button>';
-    });
-    html += '</div>';
+    html+='<div class="rating-group">';
+    ['Evet','Hayır'].forEach(function(opt){ html+='<button class="rating-btn'+(saved===opt?' selected':'')+'" onclick="pickYN(this,\''+opt+'\')">'+opt+'</button>'; });
+    html+='</div>';
   }
-  html += '</div>';
-  document.getElementById('q-container').innerHTML = html;
-  document.getElementById('btn-prev').style.display = S.curQ>0?'inline-flex':'none';
-  document.getElementById('btn-next').textContent = S.curQ===total-1?'Gönder ✓':'Sonraki →';
+  html+='</div>';
+  document.getElementById('q-container').innerHTML=html;
+  document.getElementById('btn-prev').style.display=S.curQ>0?'inline-flex':'none';
+  document.getElementById('btn-next').textContent=S.curQ===total-1?'Gönder ✓':'Sonraki →';
 }
-function pickRating(btn,val) {
-  btn.closest('.rating-group').querySelectorAll('.rating-btn').forEach(function(b){b.classList.remove('selected');});
-  btn.classList.add('selected'); S.answers[S.curQ]=val;
-}
-function pickYN(btn,val) {
-  btn.closest('.rating-group').querySelectorAll('.rating-btn').forEach(function(b){b.classList.remove('selected');});
-  btn.classList.add('selected'); S.answers[S.curQ]=val;
-}
-function saveCurrentAns() {
-  if (S.questions[S.curQ].type==='text') {
-    var ta=document.getElementById('ans-text'); if(ta) S.answers[S.curQ]=ta.value.trim();
-  }
-}
+function pickRating(btn,val) { btn.closest('.rating-group').querySelectorAll('.rating-btn').forEach(function(b){b.classList.remove('selected');}); btn.classList.add('selected'); S.answers[S.curQ]=val; }
+function pickYN(btn,val) { btn.closest('.rating-group').querySelectorAll('.rating-btn').forEach(function(b){b.classList.remove('selected');}); btn.classList.add('selected'); S.answers[S.curQ]=val; }
+function saveCurrentAns() { if(S.questions[S.curQ].type==='text'){var ta=document.getElementById('ans-text');if(ta)S.answers[S.curQ]=ta.value.trim();} }
 function nextQ() { saveCurrentAns(); if(S.curQ===S.questions.length-1){submitSurvey();return;} S.curQ++; renderQuestion(); }
 function prevQ() { saveCurrentAns(); S.curQ--; renderQuestion(); }
 
@@ -791,13 +642,10 @@ async function submitSurvey() {
   var msg=document.getElementById('submit-msg');
   if (S.sheetsUrl) {
     msg.textContent='Google Sheets\'e gönderiliyor...';
-    try {
-      await fetch(S.sheetsUrl,{method:'POST',mode:'no-cors',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
-      msg.textContent='✓ Veriler Google Sheets\'e iletildi.';
-    } catch(e) { msg.textContent='Bağlantı hatası — URL\'yi kontrol edin.'; }
+    try { await fetch(S.sheetsUrl,{method:'POST',mode:'no-cors',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)}); msg.textContent='✓ Veriler Google Sheets\'e iletildi.'; }
+    catch(e) { msg.textContent='Bağlantı hatası — URL\'yi kontrol edin.'; }
   } else { msg.textContent='Not: Google Sheets bağlantısı henüz kurulmadı.'; }
 }
-
 function resetStudent() {
   document.getElementById('student-select').style.display='block';
   document.getElementById('survey-body').style.display='none';
@@ -807,77 +655,62 @@ function resetStudent() {
   document.getElementById('st-course').innerHTML='<option value="">-- Önce sınıf seçin --</option>';
   _goTo('screen-student');
 }
-// ===================== CEVAPLAR SEKMESİ =====================
-var allRows = [];
 
+// ===================== CEVAPLAR =====================
+var allRows=[];
 async function loadCevaplar() {
-  var noUrl = document.getElementById('cevaplar-no-url');
-  var body  = document.getElementById('cevaplar-body');
-  var loading = document.getElementById('cevaplar-loading');
+  var noUrl=document.getElementById('cevaplar-no-url'), body=document.getElementById('cevaplar-body'), loading=document.getElementById('cevaplar-loading');
   if (!S.sheetsUrl) { noUrl.style.display='flex'; body.style.display='none'; return; }
   noUrl.style.display='none'; body.style.display='none'; loading.style.display='block';
   try {
-    var res = await fetch(S.sheetsUrl + '?action=get');
-    var json = await res.json();
-    allRows = json.rows || [];
-    loading.style.display='none'; body.style.display='block';
+    var res=await fetch(S.sheetsUrl+'?action=get'); var json=await res.json();
+    allRows=json.rows||[]; loading.style.display='none'; body.style.display='block';
     renderSummary(); populateDersFilter(); renderStats(); renderTable();
   } catch(e) { loading.textContent='Veri alınamadı. Apps Script kodunu güncellediğinizden emin olun.'; }
 }
-
 function renderSummary() {
-  var total = allRows.length;
-  var dersler = {};
-  allRows.forEach(function(r){ dersler[r.ders]=(dersler[r.ders]||0)+1; });
-  var puanlar = [];
-  allRows.forEach(function(r){ r.cevaplar.forEach(function(c){ var n=parseFloat(c); if(!isNaN(n)&&n>=1&&n<=5) puanlar.push(n); }); });
-  var ort = puanlar.length ? (puanlar.reduce(function(a,b){return a+b;},0)/puanlar.length).toFixed(2) : '—';
-  document.getElementById('stat-grid').innerHTML =
-    statCard('📋',total,'Toplam katılım','')+
-    statCard('📚',Object.keys(dersler).length,'Farklı ders','')+
-    statCard('⭐',ort,'Genel ortalama','(puanlama soruları)');
+  var total=allRows.length, dersler={}, puanlar=[];
+  allRows.forEach(function(r){ dersler[r.ders]=(dersler[r.ders]||0)+1; r.cevaplar.forEach(function(c){var n=parseFloat(c);if(!isNaN(n)&&n>=1&&n<=5)puanlar.push(n);}); });
+  var ort=puanlar.length?(puanlar.reduce(function(a,b){return a+b;},0)/puanlar.length).toFixed(2):'—';
+  document.getElementById('stat-grid').innerHTML=statCard('📋',total,'Toplam katılım','')+statCard('📚',Object.keys(dersler).length,'Farklı ders','')+statCard('⭐',ort,'Genel ortalama','(puanlama soruları)');
 }
 function statCard(icon,val,label,sub){ return '<div class="stat-card"><div class="stat-label">'+icon+' '+label+'</div><div class="stat-val">'+val+'</div><div class="stat-sub">'+sub+'</div></div>'; }
-
 function populateDersFilter() {
-  var dersler={};
-  allRows.forEach(function(r){ dersler[r.ders]=true; });
-  var sel=document.getElementById('filter-ders');
-  sel.innerHTML='<option value="">Tümü</option>'+Object.keys(dersler).sort().map(function(d){ return '<option value="'+d+'">'+d+'</option>'; }).join('');
+  var dersler={};allRows.forEach(function(r){dersler[r.ders]=true;});
+  document.getElementById('filter-ders').innerHTML='<option value="">Tümü</option>'+Object.keys(dersler).sort().map(function(d){return '<option value="'+d+'">'+d+'</option>';}).join('');
 }
 function getFilteredRows() {
-  var bolum=document.getElementById('filter-bolum').value;
-  var ders=document.getElementById('filter-ders').value;
-  return allRows.filter(function(r){ return (!bolum||r.sinif.indexOf(bolum)!==-1)&&(!ders||r.ders===ders); });
+  var bolum=document.getElementById('filter-bolum').value, ders=document.getElementById('filter-ders').value;
+  return allRows.filter(function(r){return(!bolum||r.sinif.indexOf(bolum)!==-1)&&(!ders||r.ders===ders);});
 }
 function renderStats() {
-  var rows=getFilteredRows(); var dersMap={};
-  rows.forEach(function(r){ if(!dersMap[r.ders]) dersMap[r.ders]={}; r.cevaplar.forEach(function(c,i){ var n=parseFloat(c); if(!isNaN(n)&&n>=1&&n<=5){ if(!dersMap[r.ders][i]) dersMap[r.ders][i]=[]; dersMap[r.ders][i].push(n); } }); });
+  var rows=getFilteredRows(),dersMap={};
+  rows.forEach(function(r){if(!dersMap[r.ders])dersMap[r.ders]={};r.cevaplar.forEach(function(c,i){var n=parseFloat(c);if(!isNaN(n)&&n>=1&&n<=5){if(!dersMap[r.ders][i])dersMap[r.ders][i]=[];dersMap[r.ders][i].push(n);}});});
   var html='';
-  Object.keys(dersMap).sort().forEach(function(ders){ var sMap=dersMap[ders]; var idxler=Object.keys(sMap).map(Number).sort(function(a,b){return a-b;}); if(!idxler.length) return;
+  Object.keys(dersMap).sort().forEach(function(ders){var sMap=dersMap[ders],idxler=Object.keys(sMap).map(Number).sort(function(a,b){return a-b;});if(!idxler.length)return;
     html+='<div class="card" style="margin-bottom:10px"><div style="font-size:13px;font-weight:600;margin-bottom:10px">📚 '+ders+'</div>';
-    idxler.forEach(function(i){ var vals=sMap[i]; var avg=vals.reduce(function(a,b){return a+b;},0)/vals.length; var soru=S.questions[i]?S.questions[i].text:'Soru '+(i+1);
+    idxler.forEach(function(i){var vals=sMap[i],avg=vals.reduce(function(a,b){return a+b;},0)/vals.length,soru=S.questions[i]?S.questions[i].text:'Soru '+(i+1);
       html+='<div class="bar-wrap"><div class="bar-label"><span style="flex:1;margin-right:8px">'+soru+'</span><span><strong>'+avg.toFixed(2)+'</strong>/5 ('+vals.length+' kişi)</span></div><div class="bar-track"><div class="bar-fill" style="width:'+((avg/5)*100)+'%"></div></div></div>';
-    }); html+='</div>';
+    });html+='</div>';
   });
   document.getElementById('stats-container').innerHTML=html||'<p style="font-size:13px;color:var(--muted)">Bu filtre için puanlama verisi bulunamadı.</p>';
 }
 function renderTable() {
-  var rows=getFilteredRows(); if(!rows.length){ document.getElementById('table-head').innerHTML=''; document.getElementById('table-body').innerHTML='<tr><td style="padding:1rem;color:var(--muted)">Kayıt bulunamadı.</td></tr>'; return; }
-  var maxC=0; rows.forEach(function(r){ if(r.cevaplar.length>maxC) maxC=r.cevaplar.length; });
+  var rows=getFilteredRows();
+  if(!rows.length){document.getElementById('table-head').innerHTML='';document.getElementById('table-body').innerHTML='<tr><td style="padding:1rem;color:var(--muted)">Kayıt bulunamadı.</td></tr>';return;}
+  var maxC=0;rows.forEach(function(r){if(r.cevaplar.length>maxC)maxC=r.cevaplar.length;});
   var thHTML='<tr><th>Tarih</th><th>Öğrenci No</th><th>Sınıf</th><th>Ders</th>';
   for(var i=0;i<maxC;i++) thHTML+='<th>'+(S.questions[i]?'S'+(i+1)+': '+S.questions[i].text.substring(0,20)+'…':'S'+(i+1))+'</th>';
   document.getElementById('table-head').innerHTML=thHTML+'</tr>';
-  document.getElementById('table-body').innerHTML=rows.map(function(r){ var td='<tr><td>'+r.tarih+'</td><td>'+r.ogrenci_no+'</td><td>'+r.sinif+'</td><td>'+r.ders+'</td>'; for(var i=0;i<maxC;i++) td+='<td>'+(r.cevaplar[i]!==undefined?r.cevaplar[i]:'—')+'</td>'; return td+'</tr>'; }).join('');
+  document.getElementById('table-body').innerHTML=rows.map(function(r){var td='<tr><td>'+r.tarih+'</td><td>'+r.ogrenci_no+'</td><td>'+r.sinif+'</td><td>'+r.ders+'</td>';for(var i=0;i<maxC;i++)td+='<td>'+(r.cevaplar[i]!==undefined?r.cevaplar[i]:'—')+'</td>';return td+'</tr>';}).join('');
 }
 function exportCSV() {
-  var rows=getFilteredRows(); if(!rows.length){ alert('Dışa aktarılacak veri yok.'); return; }
-  var maxC=0; rows.forEach(function(r){ if(r.cevaplar.length>maxC) maxC=r.cevaplar.length; });
-  var headers=['Tarih','Öğrenci No','Sınıf','Ders'];
-  for(var i=0;i<maxC;i++) headers.push(S.questions[i]?S.questions[i].text:'Soru '+(i+1));
+  var rows=getFilteredRows();if(!rows.length){alert('Dışa aktarılacak veri yok.');return;}
+  var maxC=0;rows.forEach(function(r){if(r.cevaplar.length>maxC)maxC=r.cevaplar.length;});
+  var headers=['Tarih','Öğrenci No','Sınıf','Ders'];for(var i=0;i<maxC;i++)headers.push(S.questions[i]?S.questions[i].text:'Soru '+(i+1));
   var lines=[headers.join(',')];
-  rows.forEach(function(r){ var cols=['"'+r.tarih+'"','"'+r.ogrenci_no+'"','"'+r.sinif+'"','"'+r.ders+'"']; for(var i=0;i<maxC;i++) cols.push('"'+(r.cevaplar[i]!==undefined?r.cevaplar[i]:'')+ '"'); lines.push(cols.join(',')); });
-  var blob=new Blob(['\uFEFF'+lines.join('\n')],{type:'text/csv;charset=utf-8'}); var a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='anket_sonuclari.csv'; a.click();
+  rows.forEach(function(r){var cols=['"'+r.tarih+'"','"'+r.ogrenci_no+'"','"'+r.sinif+'"','"'+r.ders+'"'];for(var i=0;i<maxC;i++)cols.push('"'+(r.cevaplar[i]!==undefined?r.cevaplar[i]:'')+ '"');lines.push(cols.join(','));});
+  var blob=new Blob(['\uFEFF'+lines.join('\n')],{type:'text/csv;charset=utf-8'});var a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='anket_sonuclari.csv';a.click();
 }
 </script>
 </body>
