@@ -451,10 +451,35 @@ var MUFREDAT = {
   }
 };
 
-var S = {
-  questions: [], sheetsUrl: '', donem: 'ikisi',
-  secmeli: {}, curClass: '', curCourse: '', curStudentNo: '', curQ: 0, answers: []
-};
+function loadState() {
+  try {
+    var saved = localStorage.getItem('anket_state');
+    if (saved) {
+      var parsed = JSON.parse(saved);
+      return {
+        questions: parsed.questions || [],
+        sheetsUrl: parsed.sheetsUrl || '',
+        donem: parsed.donem || 'ikisi',
+        secmeli: parsed.secmeli || {},
+        curClass: '', curCourse: '', curStudentNo: '', curQ: 0, answers: []
+      };
+    }
+  } catch(e) {}
+  return { questions: [], sheetsUrl: '', donem: 'ikisi', secmeli: {}, curClass: '', curCourse: '', curStudentNo: '', curQ: 0, answers: [] };
+}
+
+function saveState() {
+  try {
+    localStorage.setItem('anket_state', JSON.stringify({
+      questions: S.questions,
+      sheetsUrl: S.sheetsUrl,
+      donem: S.donem,
+      secmeli: S.secmeli
+    }));
+  } catch(e) {}
+}
+
+var S = loadState();
 
 var ADMIN_PWD = 'sbf2024';
 
@@ -486,7 +511,10 @@ document.addEventListener('DOMContentLoaded', function(){
     if (footerClicks >= 3) { footerClicks = 0; openPwdModal(); }
   });
   document.body.appendChild(hint);
+if (S.sheetsUrl) { document.getElementById('sheets-url').value=S.sheetsUrl; document.getElementById('url-ok').style.display='block'; }
   renderDonemUI();
+  renderQuestions();
+  renderSecmeliList();
   _goTo('screen-student');
 });
 
@@ -510,7 +538,7 @@ function switchTab(btn, panelId) {
   document.getElementById(panelId).classList.add('active');
 }
 
-function setDonem(d) { S.donem = d; renderDonemUI(); }
+function setDonem(d) { S.donem = d; renderDonemUI(); saveState(); }
 function renderDonemUI() {
   var labels = { guz: '🍂 Güz Dönemi', bahar: '🌸 Bahar Dönemi', ikisi: '📅 İkisi de Açık' };
   document.getElementById('donem-label').textContent = labels[S.donem];
@@ -544,9 +572,10 @@ function addSecmeli() {
   if (!S.secmeli[key]) S.secmeli[key]=[];
   if (S.secmeli[key].indexOf(ders)===-1) S.secmeli[key].push(ders);
   document.getElementById('sec-ders').value='';
-  renderSecmeliList();
+  renderSecmeliList(); saveState();
 }
-function removeSecmeli(key,i) { S.secmeli[key].splice(i,1); if(!S.secmeli[key].length) delete S.secmeli[key]; renderSecmeliList(); }
+function removeSecmeli(key,i) { S.secmeli[key].splice(i,1); if(!S.secmeli[key].length) delete S.secmeli[key];   renderSecmeliList(); saveState();
+ }
 function renderSecmeliList() {
   var el=document.getElementById('secmeli-list'), keys=Object.keys(S.secmeli);
   if (!keys.length) { el.innerHTML='<p style="font-size:13px;color:var(--muted)">Henüz seçmeli ders eklenmedi.</p>'; return; }
@@ -561,9 +590,9 @@ function toggleSecGroup(header) { header.nextElementSibling.classList.toggle('op
 function addQuestion() {
   var text=document.getElementById('new-q-text').value.trim(), type=document.getElementById('new-q-type').value;
   if (!text) return;
-  S.questions.push({text:text,type:type}); document.getElementById('new-q-text').value=''; renderQuestions();
+  S.questions.push({text:text,type:type}); document.getElementById('new-q-text').value=''; renderQuestions(); saveState();
 }
-function deleteQuestion(i) { S.questions.splice(i,1); renderQuestions(); }
+function deleteQuestion(i) { S.questions.splice(i,1); renderQuestions(); saveState(); }
 function renderQuestions() {
   var el=document.getElementById('question-list');
   if (!S.questions.length) { el.innerHTML='<p style="font-size:13px;color:var(--muted)">Henüz soru eklenmedi.</p>'; return; }
@@ -574,6 +603,7 @@ function renderQuestions() {
 function saveUrl() {
   S.sheetsUrl=document.getElementById('sheets-url').value.trim();
   document.getElementById('url-ok').style.display=S.sheetsUrl?'block':'none';
+  saveState();
 }
 
 function getActiveDonems() { if(S.donem==='guz') return ['guz']; if(S.donem==='bahar') return ['bahar']; return ['guz','bahar']; }
