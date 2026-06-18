@@ -5,7 +5,26 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Ders Değerlendirme Sistemi</title>
 <meta name="robots" content="noindex, nofollow, noarchive">
-<style>
+/* Cevaplar sekmesi */
+  .data-table-wrap { overflow-x: auto; border: 1px solid var(--border); border-radius: var(--radius-sm); margin-top: 10px; }
+  .data-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+  .data-table th { background: var(--bg); padding: 8px 10px; text-align: left; font-weight: 600; color: var(--muted); border-bottom: 1px solid var(--border); white-space: nowrap; }
+  .data-table td { padding: 7px 10px; border-bottom: 1px solid var(--border); color: var(--text); }
+  .data-table tr:last-child td { border-bottom: none; }
+  .data-table tr:hover td { background: var(--bg); }
+  .stat-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px,1fr)); gap: 12px; margin-bottom: 1rem; }
+  .stat-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 14px; }
+  .stat-card .stat-label { font-size: 12px; color: var(--muted); margin-bottom: 4px; }
+  .stat-card .stat-val { font-size: 24px; font-weight: 700; color: var(--accent); }
+  .stat-card .stat-sub { font-size: 11px; color: var(--muted); margin-top: 2px; }
+  .bar-wrap { margin-bottom: 10px; }
+  .bar-label { display: flex; justify-content: space-between; font-size: 12px; color: var(--muted); margin-bottom: 3px; }
+  .bar-track { height: 8px; background: var(--border); border-radius: 4px; }
+  .bar-fill { height: 8px; background: var(--accent); border-radius: 4px; transition: width 0.4s; }
+  .filter-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 12px; align-items: flex-end; }
+  .filter-row select { width: auto; min-width: 160px; }
+  .loading-msg { text-align: center; padding: 2rem; color: var(--muted); font-size: 13px; }
+  <style>
   :root {
     --bg: #F7F6F3;
     --surface: #FFFFFF;
@@ -164,6 +183,7 @@
     <button class="tab-btn" onclick="switchTab(this,'tp-secmeli')">Seçmeli Dersler</button>
     <button class="tab-btn" onclick="switchTab(this,'tp-questions')">Sorular</button>
     <button class="tab-btn" onclick="switchTab(this,'tp-sheets')">Google Sheets</button>
+    <button class="tab-btn" onclick="switchTab(this,'tp-cevaplar');loadCevaplar()">Cevaplar</button>
   </div>
 
   <!-- Dönem Ayarı -->
@@ -263,6 +283,47 @@
       <div class="url-ok" id="url-ok">✓ URL kaydedildi</div>
     </div>
     <div class="alert alert-warning">⚠️ "Bu uygulama doğrulanmamış" uyarısı çıkarsa "Gelişmiş → Proje'ye git" ile devam edin.</div>
+  </div>
+
+  <!-- Cevaplar -->
+  <div id="tp-cevaplar" class="tab-panel">
+    <div id="cevaplar-no-url" class="alert alert-warning" style="display:none">
+      ⚠️ Google Sheets URL'i girilmemiş. "Google Sheets" sekmesinden URL'i ekleyin.
+    </div>
+    <div id="cevaplar-body" style="display:none">
+      <div class="card-title" style="margin-bottom:8px">Genel Özet</div>
+      <div class="stat-grid" id="stat-grid"></div>
+      <div class="card-title" style="margin-top:1rem;margin-bottom:8px">Ders Bazında Ortalamalar</div>
+      <div class="filter-row">
+        <div>
+          <label style="font-size:12px;color:var(--muted);display:block;margin-bottom:3px">Bölüm filtrele</label>
+          <select id="filter-bolum" onchange="renderStats()">
+            <option value="">Tümü</option>
+            <option value="Beden Eğitimi ve Spor Öğretmenliği">Beden Eğitimi</option>
+            <option value="Antrenörlük Eğitimi">Antrenörlük</option>
+          </select>
+        </div>
+        <div>
+          <label style="font-size:12px;color:var(--muted);display:block;margin-bottom:3px">Ders filtrele</label>
+          <select id="filter-ders" onchange="renderStats()">
+            <option value="">Tümü</option>
+          </select>
+        </div>
+      </div>
+      <div id="stats-container"></div>
+      <div class="card-title" style="margin-top:1.5rem;margin-bottom:8px">Tüm Cevaplar</div>
+      <div class="filter-row">
+        <button class="btn btn-sm" onclick="exportCSV()">⬇ CSV İndir</button>
+        <button class="btn btn-sm" onclick="loadCevaplar()">↻ Yenile</button>
+      </div>
+      <div class="data-table-wrap">
+        <table class="data-table">
+          <thead id="table-head"></thead>
+          <tbody id="table-body"></tbody>
+        </table>
+      </div>
+    </div>
+    <div id="cevaplar-loading" class="loading-msg" style="display:none">Veriler yükleniyor...</div>
   </div>
 </div>
 
@@ -745,6 +806,78 @@ function resetStudent() {
   document.getElementById('st-class').innerHTML='<option value="">-- Önce bölüm seçin --</option>';
   document.getElementById('st-course').innerHTML='<option value="">-- Önce sınıf seçin --</option>';
   _goTo('screen-student');
+}
+// ===================== CEVAPLAR SEKMESİ =====================
+var allRows = [];
+
+async function loadCevaplar() {
+  var noUrl = document.getElementById('cevaplar-no-url');
+  var body  = document.getElementById('cevaplar-body');
+  var loading = document.getElementById('cevaplar-loading');
+  if (!S.sheetsUrl) { noUrl.style.display='flex'; body.style.display='none'; return; }
+  noUrl.style.display='none'; body.style.display='none'; loading.style.display='block';
+  try {
+    var res = await fetch(S.sheetsUrl + '?action=get');
+    var json = await res.json();
+    allRows = json.rows || [];
+    loading.style.display='none'; body.style.display='block';
+    renderSummary(); populateDersFilter(); renderStats(); renderTable();
+  } catch(e) { loading.textContent='Veri alınamadı. Apps Script kodunu güncellediğinizden emin olun.'; }
+}
+
+function renderSummary() {
+  var total = allRows.length;
+  var dersler = {};
+  allRows.forEach(function(r){ dersler[r.ders]=(dersler[r.ders]||0)+1; });
+  var puanlar = [];
+  allRows.forEach(function(r){ r.cevaplar.forEach(function(c){ var n=parseFloat(c); if(!isNaN(n)&&n>=1&&n<=5) puanlar.push(n); }); });
+  var ort = puanlar.length ? (puanlar.reduce(function(a,b){return a+b;},0)/puanlar.length).toFixed(2) : '—';
+  document.getElementById('stat-grid').innerHTML =
+    statCard('📋',total,'Toplam katılım','')+
+    statCard('📚',Object.keys(dersler).length,'Farklı ders','')+
+    statCard('⭐',ort,'Genel ortalama','(puanlama soruları)');
+}
+function statCard(icon,val,label,sub){ return '<div class="stat-card"><div class="stat-label">'+icon+' '+label+'</div><div class="stat-val">'+val+'</div><div class="stat-sub">'+sub+'</div></div>'; }
+
+function populateDersFilter() {
+  var dersler={};
+  allRows.forEach(function(r){ dersler[r.ders]=true; });
+  var sel=document.getElementById('filter-ders');
+  sel.innerHTML='<option value="">Tümü</option>'+Object.keys(dersler).sort().map(function(d){ return '<option value="'+d+'">'+d+'</option>'; }).join('');
+}
+function getFilteredRows() {
+  var bolum=document.getElementById('filter-bolum').value;
+  var ders=document.getElementById('filter-ders').value;
+  return allRows.filter(function(r){ return (!bolum||r.sinif.indexOf(bolum)!==-1)&&(!ders||r.ders===ders); });
+}
+function renderStats() {
+  var rows=getFilteredRows(); var dersMap={};
+  rows.forEach(function(r){ if(!dersMap[r.ders]) dersMap[r.ders]={}; r.cevaplar.forEach(function(c,i){ var n=parseFloat(c); if(!isNaN(n)&&n>=1&&n<=5){ if(!dersMap[r.ders][i]) dersMap[r.ders][i]=[]; dersMap[r.ders][i].push(n); } }); });
+  var html='';
+  Object.keys(dersMap).sort().forEach(function(ders){ var sMap=dersMap[ders]; var idxler=Object.keys(sMap).map(Number).sort(function(a,b){return a-b;}); if(!idxler.length) return;
+    html+='<div class="card" style="margin-bottom:10px"><div style="font-size:13px;font-weight:600;margin-bottom:10px">📚 '+ders+'</div>';
+    idxler.forEach(function(i){ var vals=sMap[i]; var avg=vals.reduce(function(a,b){return a+b;},0)/vals.length; var soru=S.questions[i]?S.questions[i].text:'Soru '+(i+1);
+      html+='<div class="bar-wrap"><div class="bar-label"><span style="flex:1;margin-right:8px">'+soru+'</span><span><strong>'+avg.toFixed(2)+'</strong>/5 ('+vals.length+' kişi)</span></div><div class="bar-track"><div class="bar-fill" style="width:'+((avg/5)*100)+'%"></div></div></div>';
+    }); html+='</div>';
+  });
+  document.getElementById('stats-container').innerHTML=html||'<p style="font-size:13px;color:var(--muted)">Bu filtre için puanlama verisi bulunamadı.</p>';
+}
+function renderTable() {
+  var rows=getFilteredRows(); if(!rows.length){ document.getElementById('table-head').innerHTML=''; document.getElementById('table-body').innerHTML='<tr><td style="padding:1rem;color:var(--muted)">Kayıt bulunamadı.</td></tr>'; return; }
+  var maxC=0; rows.forEach(function(r){ if(r.cevaplar.length>maxC) maxC=r.cevaplar.length; });
+  var thHTML='<tr><th>Tarih</th><th>Öğrenci No</th><th>Sınıf</th><th>Ders</th>';
+  for(var i=0;i<maxC;i++) thHTML+='<th>'+(S.questions[i]?'S'+(i+1)+': '+S.questions[i].text.substring(0,20)+'…':'S'+(i+1))+'</th>';
+  document.getElementById('table-head').innerHTML=thHTML+'</tr>';
+  document.getElementById('table-body').innerHTML=rows.map(function(r){ var td='<tr><td>'+r.tarih+'</td><td>'+r.ogrenci_no+'</td><td>'+r.sinif+'</td><td>'+r.ders+'</td>'; for(var i=0;i<maxC;i++) td+='<td>'+(r.cevaplar[i]!==undefined?r.cevaplar[i]:'—')+'</td>'; return td+'</tr>'; }).join('');
+}
+function exportCSV() {
+  var rows=getFilteredRows(); if(!rows.length){ alert('Dışa aktarılacak veri yok.'); return; }
+  var maxC=0; rows.forEach(function(r){ if(r.cevaplar.length>maxC) maxC=r.cevaplar.length; });
+  var headers=['Tarih','Öğrenci No','Sınıf','Ders'];
+  for(var i=0;i<maxC;i++) headers.push(S.questions[i]?S.questions[i].text:'Soru '+(i+1));
+  var lines=[headers.join(',')];
+  rows.forEach(function(r){ var cols=['"'+r.tarih+'"','"'+r.ogrenci_no+'"','"'+r.sinif+'"','"'+r.ders+'"']; for(var i=0;i<maxC;i++) cols.push('"'+(r.cevaplar[i]!==undefined?r.cevaplar[i]:'')+ '"'); lines.push(cols.join(',')); });
+  var blob=new Blob(['\uFEFF'+lines.join('\n')],{type:'text/csv;charset=utf-8'}); var a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='anket_sonuclari.csv'; a.click();
 }
 </script>
 </body>
